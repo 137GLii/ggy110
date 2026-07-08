@@ -1,0 +1,177 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# ============================================================
+# 生成模拟股票价格数据（几何布朗运动）
+# ============================================================
+np.random.seed(42)
+
+days = 252
+n = days + 1
+tk = ['AAPL', 'MSFT', 'GOOGL']
+p0 = np.array([210.0, 500.0, 180.0])
+mu_d = np.array([0.0008, -0.0004, 0.0012])
+sig_d = np.array([0.015, 0.017, 0.019])
+
+eps = np.random.randn(days, 3)
+dr = mu_d + sig_d * eps
+c = np.zeros((n, 3))
+c[0] = p0
+for t in range(1, n):
+    c[t] = c[t - 1] * np.exp(dr[t - 1])
+
+print(f"模拟数据: {days}个交易日, 3只股票")
+for i, t in enumerate(tk):
+    print(f"  {t}: ${c[0, i]:.0f} -> ${c[-1, i]:.2f}")
+
+# ============================================================
+# 1. 收益率与波动率
+# ============================================================
+r = np.log(c[1:] / c[:-1])
+ann = 252
+mu = np.mean(r, axis=0) * ann
+sig = np.std(r, axis=0, ddof=1) * np.sqrt(ann)
+sr = mu / sig
+cum = np.exp(np.cumsum(r, axis=0)) - 1
+
+print("\n" + "=" * 40)
+print("收益率与波动率")
+print("=" * 40)
+for i, t in enumerate(tk):
+    print(f"{t}: 年化收益={mu[i] * 100:.2f}%, 波动={sig[i] * 100:.2f}%, 夏普={sr[i]:.3f}")
+print(f"累计收益率: AAPL={cum[-1, 0] * 100:.1f}%, MSFT={cum[-1, 1] * 100:.1f}%, GOOGL={cum[-1, 2] * 100:.1f}%")
+
+# ============================================================
+# 2. NumPy 移动平均线
+# ============================================================
+def ma(p, w):
+    k = np.ones(w) / w
+    return np.convolve(p, k, mode='valid')
+
+def ema(p, a):
+    e = np.zeros_like(p)
+    e[0] = p[0]
+    for i in range(1, len(p)):
+        e[i] = a * p[i] + (1 - a) * e[i - 1]
+    return e
+
+pa = c[:, 0]
+s5 = ma(pa, 5)
+s20 = ma(pa, 20)
+s60 = ma(pa, 60)
+ea12 = ema(pa, 2 / 13)
+ea26 = ema(pa, 2 / 27)
+
+print("\n" + "=" * 40)
+print("AAPL 移动平均线")
+print("=" * 40)
+print(f"MA5={s5[-1]:.2f}, MA20={s20[-1]:.2f}, MA60={s60[-1]:.2f}")
+print(f"EMA12={ea12[-1]:.2f}, EMA26={ea26[-1]:.2f}")
+
+# ============================================================
+# 3. 投资组合风险分析
+# ============================================================
+cov = np.cov(r.T, ddof=1) * ann
+corr = np.corrcoef(r.T)
+
+print("\n" + "=" * 40)
+print("投资组合风险分析")
+print("=" * 40)
+print("年化协方差矩阵:")
+print(np.array2string(cov, precision=4))
+print("\n相关系数矩阵:")
+print(np.array2string(corr, precision=4))
+
+# 等权重组合
+w_eq = np.ones(3) / 3
+rp_eq = w_eq @ mu
+sigp_eq = np.sqrt(w_eq @ cov @ w_eq)
+print(f"\n等权重组合: 收益={rp_eq * 100:.2f}%, 波动={sigp_eq * 100:.2f}%")
+
+# 最小方差组合
+w_gmv = np.linalg.inv(cov) @ np.ones(3)
+w_gmv /= np.sum(w_gmv)
+rp_gmv = w_gmv @ mu
+sigp_gmv = np.sqrt(w_gmv @ cov @ w_gmv)
+print(f"最小方差组合: 收益={rp_gmv * 100:.2f}%, 波动={sigp_gmv * 100:.2f}%")
+print(f"  权重: AAPL={w_gmv[0] * 100:.1f}%, MSFT={w_gmv[1] * 100:.1f}%, GOOGL={w_gmv[2] * 100:.1f}%")
+
+# 最大夏普组合
+w_msr = np.linalg.inv(cov) @ mu
+w_msr /= np.sum(w_msr)
+rp_msr = w_msr @ mu
+sigp_msr = np.sqrt(w_msr @ cov @ w_msr)
+print(f"最大夏普组合: 收益={rp_msr * 100:.2f}%, 波动={sigp_msr * 100:.2f}%, 夏普={rp_msr / sigp_msr:.3f}")
+
+# 蒙特卡洛模拟有效前沿
+w_r = np.random.dirichlet(np.ones(3), 5000)
+rp_r = w_r @ mu
+sigp_r = np.sqrt(np.sum(w_r @ cov * w_r, axis=1))
+
+# ============================================================
+# 4. 可视化
+# ============================================================
+fig, ax = plt.subplots(2, 3, figsize=(16, 9))
+
+# 股价走势
+ax[0, 0].plot(c[:, 0], label='AAPL', lw=1)
+ax[0, 0].plot(c[:, 1], label='MSFT', lw=1)
+ax[0, 0].plot(c[:, 2], label='GOOGL', lw=1)
+ax[0, 0].set_title('Stock Prices')
+ax[0, 0].legend()
+ax[0, 0].grid(True, alpha=0.3)
+
+# 累计收益
+ax[0, 1].plot(cum[:, 0] * 100, label='AAPL', lw=1)
+ax[0, 1].plot(cum[:, 1] * 100, label='MSFT', lw=1)
+ax[0, 1].plot(cum[:, 2] * 100, label='GOOGL', lw=1)
+ax[0, 1].axhline(0, color='k', ls='--', alpha=0.5)
+ax[0, 1].set_title('Cumulative Returns (%)')
+ax[0, 1].legend()
+ax[0, 1].grid(True, alpha=0.3)
+
+# 移动平均
+ax[0, 2].plot(pa, label='Price', color='k', lw=0.8, alpha=0.5)
+ax[0, 2].plot(range(4, n), s5, label='MA5', color='r', lw=1)
+ax[0, 2].plot(range(19, n), s20, label='MA20', color='b', lw=1)
+ax[0, 2].plot(range(59, n), s60, label='MA60', color='g', lw=1)
+ax[0, 2].set_title('AAPL with Moving Averages')
+ax[0, 2].legend()
+ax[0, 2].grid(True, alpha=0.3)
+
+# 收益分布
+for i, t in enumerate(tk):
+    ax[1, 0].hist(r[:, i] * 100, bins=40, alpha=0.4, label=t, density=True)
+ax[1, 0].set_title('Daily Return Distribution')
+ax[1, 0].set_xlabel('Return (%)')
+ax[1, 0].legend()
+ax[1, 0].grid(True, alpha=0.3)
+
+# 相关性热力图
+im = ax[1, 1].imshow(corr, cmap='coolwarm', vmin=-1, vmax=1)
+ax[1, 1].set_xticks(range(3))
+ax[1, 1].set_yticks(range(3))
+ax[1, 1].set_xticklabels(tk)
+ax[1, 1].set_yticklabels(tk)
+for i in range(3):
+    for j in range(3):
+        ax[1, 1].text(j, i, f'{corr[i, j]:.2f}', ha='center', va='center')
+ax[1, 1].set_title('Correlation Matrix')
+plt.colorbar(im, ax=ax[1, 1], shrink=0.7)
+
+# 有效前沿
+ax[1, 2].scatter(sigp_r * 100, rp_r * 100, c=rp_r / sigp_r, cmap='viridis', s=5, alpha=0.5)
+ax[1, 2].scatter(sigp_gmv * 100, rp_gmv * 100, color='r', s=80, marker='*', label='Min Var', zorder=5)
+ax[1, 2].scatter(sigp_msr * 100, rp_msr * 100, color='gold', s=80, marker='*', label='Max Sharpe', zorder=5)
+ax[1, 2].scatter(sigp_eq * 100, rp_eq * 100, color='b', s=60, marker='o', label='Equal Wt', zorder=5)
+for i, t in enumerate(tk):
+    ax[1, 2].scatter(sig[i] * 100, mu[i] * 100, color='k', s=50, zorder=5)
+    ax[1, 2].annotate(t, (sig[i] * 100, mu[i] * 100), textcoords="offset points", xytext=(5, 5))
+ax[1, 2].set_xlabel('Volatility (%)')
+ax[1, 2].set_ylabel('Expected Return (%)')
+ax[1, 2].set_title('Efficient Frontier')
+ax[1, 2].legend()
+ax[1, 2].grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
