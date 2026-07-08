@@ -1,0 +1,150 @@
+stu = {}
+sub = ["语文", "数学", "英语"]
+def mnu():                        # mnu: 显示菜单
+    print("\n学生成绩管理系统")
+    print("1. 录入学生成绩")
+    print("2. 查询学生成绩")
+    print("3. 修改学生成绩")
+    print("4. 删除学生信息")
+    print("5. 统计全班成绩")
+    print("6. 显示所有学生")
+    print("0. 退出系统")
+def add():                        # add: 录入学生
+    sid = input("请输入学号: ").strip()  # sid: 学号
+    if sid == "":
+        print("学号不能为空!")
+        return
+    if sid in stu:
+        print("该学号已存在!")
+        return
+    nm = input("请输入姓名: ").strip()  # nm: 姓名
+    if nm == "":
+        print("姓名不能为空!")
+        return
+    sc = {}                       # sc: 成绩
+    for s in sub:                 # s: 当前科目
+        while True:
+            try:
+                sc[s] = float(input("请输入 " + s + " 成绩: "))
+                if 0 <= sc[s] <= 100:
+                    break
+                else:
+                    print("成绩应在 0-100 之间!")
+            except:
+                print("请输入有效的数字!")
+    stu[sid] = {"姓名": nm, "成绩": sc}
+    print("录入成功!")
+def qry():                        # qry: 查询学生
+    sid = input("请输入要查询的学号: ").strip()  # sid: 学号
+    if sid not in stu:
+        print("未找到该学号!")
+        return
+    inf = stu[sid]                # inf: 该学生信息
+    sc = inf["成绩"]               # sc: 成绩字典
+    print("\n学号:", sid)
+    print("姓名:", inf["姓名"])
+    sl = [sc[s] for s in sub if s in sc]  # sl: 成绩列表
+    tot = sum(sl)                 # tot: 总分
+    avg = tot / len(sl) if sl else 0  # avg: 平均分
+    for s in sub:
+        print(" ", s + ":", sc.get(s, "未录入"))
+    print(" 总分:", tot)
+    print(" 平均分:", round(avg, 2))
+def mod():                        # mod: 修改成绩
+    sid = input("请输入要修改的学号: ").strip()  # sid: 学号
+    if sid not in stu:
+        print("未找到该学号!")
+        return
+    inf = stu[sid]                # inf: 学生信息
+    print("当前学生:", inf["姓名"])
+    sc = inf["成绩"]               # sc: 成绩字典
+    for s in sub:                 # s: 科目
+        cur = sc.get(s, "未录入")   # cur: 当前成绩
+        ns = input(s + " 当前成绩: " + str(cur) + ", 新成绩(直接回车跳过): ").strip()  # ns: 新成绩输入
+        if ns != "":
+            try:
+                sco = float(ns)   # sco: 新成绩
+                if 0 <= sco <= 100:
+                    sc[s] = sco
+                else:
+                    print("成绩范围错误，跳过!")
+            except:
+                print("输入无效，跳过!")
+    print("修改完成!")
+def dlt():                        # dlt: 删除学生
+    sid = input("请输入要删除的学号: ").strip()  # sid: 学号
+    if sid not in stu:
+        print("未找到该学号!")
+        return
+    nm = stu[sid]["姓名"]          # nm: 学生姓名
+    cf = input("确认删除 " + nm + " 吗? (y/n): ").strip().lower()  # cf: 确认输入
+    if cf == "y":
+        del stu[sid]
+        print("删除成功!")
+    else:
+        print("已取消删除")
+def lst():                        # lst: 显示所有学生
+    if len(stu) == 0:
+        print("暂无学生数据!")
+        return
+    print("\n学号\t\t姓名\t\t语文\t数学\t英语\t总分\t平均分")
+    print("-" * 60)
+    for sid in stu:               # sid: 学号
+        inf = stu[sid]            # inf: 学生信息
+        sc = inf["成绩"]           # sc: 成绩字典
+        sl = [sc.get(s, 0) for s in sub]  # sl: 成绩列表
+        tot = sum(sl)             # tot: 总分
+        avg = tot / len(sub)      # avg: 平均分
+        print(sid + "\t\t" + inf["姓名"] + "\t\t" +
+              str(sc.get("语文", 0)) + "\t" + str(sc.get("数学", 0)) + "\t" +
+              str(sc.get("英语", 0)) + "\t" + str(tot) + "\t" +
+              str(round(avg, 2)))
+    print("-" * 60)
+def stt():                        # stt: 统计全班成绩
+    if len(stu) == 0:
+        print("暂无数据!")
+        return
+    print("\n全班成绩统计")
+    for s in sub:                 # s: 科目
+        ssl = [inf["成绩"][s] for inf in stu.values() if s in inf["成绩"]]  # ssl: 该科目成绩列表
+        if not ssl:
+            print("\n" + s + ": 暂无数据")
+            continue
+        avg = sum(ssl) / len(ssl) # avg: 平均分
+        mx = max(ssl)             # mx: 最高分
+        mn = min(ssl)             # mn: 最低分
+        ts = [inf["姓名"] for sid, inf in stu.items() if inf["成绩"].get(s) == mx]  # ts: 最高分学生名单
+        ls = [inf["姓名"] for sid, inf in stu.items() if inf["成绩"].get(s) == mn]  # ls: 最低分学生名单
+        print("\n【" + s + "】")
+        print("  参考人数:", len(ssl))
+        print("  平均分:", round(avg, 2))
+        print("  最高分:", mx, "(" + ", ".join(ts) + ")")
+        print("  最低分:", mn, "(" + ", ".join(ls) + ")")
+    print("\n" + "-" * 50)
+    print("总分排名:")
+    rk = [[inf["姓名"], sum(inf["成绩"].get(s, 0) for s in sub)] for sid, inf in stu.items()]  # rk: 排名列表
+    rk.sort(key=lambda x: x[1], reverse=True)  # lambda + sort() 按总分降序
+    for i in range(len(rk)):
+        nm = rk[i][0]             # nm: 姓名
+        tot = rk[i][1]            # tot: 总分
+        print("  第" + str(i + 1) + "名: " + nm + " 总分:" + str(tot))
+while True:
+    mnu()
+    cho = input("请选择操作: ").strip()  # cho: 用户选择
+    if cho == "1":
+        add()
+    elif cho == "2":
+        qry()
+    elif cho == "3":
+        mod()
+    elif cho == "4":
+        dlt()
+    elif cho == "5":
+        stt()
+    elif cho == "6":
+        lst()
+    elif cho == "0":
+        print("感谢使用，再见!")
+        break
+    else:
+        print("无效选项，请重新输入!")
