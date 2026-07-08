@@ -1,0 +1,86 @@
+import numpy as np
+
+
+# 一、创建不同维度的数组（1D、2D、3D）
+
+# 1D 数组
+a1 = np.array([1, 2, 3, 4, 5])
+print(f"1D 数组: {a1}, shape={a1.shape}, ndim={a1.ndim}")
+
+# 2D 数组
+a2 = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+print(f"2D 数组:\\n{a2}, shape={a2.shape}")
+
+# 3D 数组
+a3 = np.array([[[1, 2], [3, 4]], [[5, 6], [7, 8]]])
+print(f"3D 数组:\\n{a3}, shape={a3.shape}")
+
+np.zeros((2, 3))
+np.ones((2, 3))
+np.eye(3)
+np.arange(0, 10, 2)
+np.linspace(0, 1, 5)
+
+
+# 二、数组的索引与切片
+
+
+a = np.array([[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]])
+
+a[1, 2]       # 单个元素
+a[0:2, 1:3]   # 区域切片
+a[::2, ::2]   # 步长切片
+a[a > 6]      # 布尔索引
+a[[0, 2]]     # 花式索引（取指定行）
+
+
+# 三、形状变换操作
+
+
+a = np.arange(12)
+
+a.reshape(3, 4)       # 重塑形状
+a.ravel()             # 展平
+a.T                   # 转置
+a[:, np.newaxis]      # 增加维度
+f.squeeze()           # 压缩维度
+g.resize(2, 3)        # 原地修改形状
+
+
+# 四、矩阵基本运算（函数封装）
+
+
+def madd(A, B):       return A + B       # 加法
+def mmul(A, B):       return A @ B       # 乘法
+def mtrans(A):        return A.T         # 转置
+def mdet(A):          return np.linalg.det(A)   # 行列式
+def minv(A):          return np.linalg.inv(A)   # 逆矩阵
+
+# 广播示例
+A + 10    # 矩阵 + 标量
+
+
+# 五、随机数据生成与统计分析
+
+
+np.random.seed(42)
+
+np.random.rand(3, 3)           # 均匀分布
+np.random.randn(2, 4)          # 标准正态
+np.random.randint(1, 100, 5)   # 随机整数
+
+# 统计函数
+np.sum(data)
+np.mean(data)
+np.std(data)
+np.var(data)
+np.min(data)
+np.max(data)
+np.argmin(data)
+np.argmax(data)
+np.median(data)
+np.percentile(data, 75)   # 百分位数
+
+# 按轴统计
+np.sum(m, axis=0)   # 按列
+np.sum(m, axis=1)   # 按行
