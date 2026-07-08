@@ -1,0 +1,67 @@
+import math
+F = "h.txt"
+def a(x, y):
+    return x + y
+def s(x, y):
+    return x - y
+def m(x, y):
+    return x * y
+def d(x, y):
+    if y == 0:
+        raise ZeroDivisionError("除数不能为零")
+    return x / y
+def p(x, y):
+    return x ** y
+def r(x):
+    if x < 0:
+        raise ValueError("负数不能开平方")
+    return math.sqrt(x)
+def w(t):
+    with open(F, "a", encoding="utf-8") as f:
+        f.write(t + "\n")
+def l():
+    try:
+        with open(F, "r", encoding="utf-8") as f:
+            return f.readlines()
+    except FileNotFoundError:
+        return []
+def g(p):
+    while True:
+        try:
+            return float(input(p))
+        except ValueError:
+            print("输入错误")
+def main():
+    while True:
+        print("\n1.加 2.减 3.乘 4.除 5.幂 6.根 7.史 0.退")
+        c = input("选: ").strip()
+        if c == "0":
+            break
+        elif c == "7":
+            h = l()
+            print("".join(h), end="") if h else print("无")
+            continue
+        if c not in ("1","2","3","4","5","6"):
+            print("无效")
+            continue
+        x = g("数1: ")
+        if c == "6":
+            try:
+                e = f"√{x} = {r(x)}"
+            except ValueError as v:
+                print(v)
+                continue
+        else:
+            y = g("数2: ")
+            try:
+                if c == "1": e = f"{x}+{y}={a(x,y)}"
+                elif c == "2": e = f"{x}-{y}={s(x,y)}"
+                elif c == "3": e = f"{x}*{y}={m(x,y)}"
+                elif c == "4": e = f"{x}/{y}={d(x,y)}"
+                elif c == "5": e = f"{x}^{y}={p(x,y)}"
+            except ZeroDivisionError as z:
+                print(z)
+                continue
+        print(e)
+        w(e)
+main()
