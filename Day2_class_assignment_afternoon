@@ -60,31 +60,26 @@ np.add(buf1, 1, out=buf1)
 
 
 
-# 2.1 对数收益率
-pr = np.array([100, 102, 105, 103, 107])
-rt = np.diff(np.log(pr))
 
-# 2.2 移动平均线
+prices = np.array([100, 102, 105, 103, 107])
+returns = np.diff(np.log(prices))
+print(returns)
+
+
+
 np.random.seed(42)
-pr = 100 + np.cumsum(np.random.randn(100) * 2)
-ma5 = np.convolve(pr, np.ones(5)/5, mode='valid')
-ma20 = np.convolve(pr, np.ones(20)/20, mode='valid')
-cs = np.cumsum(np.insert(pr, 0, 0))
-mf = (cs[5:] - cs[:-5]) / 5
-# 2.3 风险分析
-np.random.seed(42)
-r = np.random.randn(1000, 252) * 0.01 + 0.0005
-vol = np.std(r, axis=1, ddof=1, keepdims=True) * np.sqrt(252)
-print(r.flags.owndata)
-corr = np.corrcoef(r)
-@njit
-def mb(arr, w):
-    n = len(arr)
-    out = np.empty(n - w + 1)
-    for i in range(n - w + 1):
-        s = 0.0
-        for j in range(w):
-            s += arr[i + j]
-        out[i] = s / w
-    return out
-mn = mb(pr, 5)
+prices = np.cumsum(np.random.randn(100)) + 100
+window = 5
+ma5 = np.convolve(prices, np.ones(window) / window, mode='valid')
+window = 20
+ma20 = np.convolve(prices, np.ones(window) / window, mode='valid')
+print(ma5[:5])
+print(ma20[:5])
+
+
+
+data = np.random.randn(1000, 252) * 0.02
+volatility = data.std(axis=1, keepdims=True) * np.sqrt(252)
+correlation = np.corrcoef(data)
+print(volatility[:5])
+print(correlation[:3, :3])
