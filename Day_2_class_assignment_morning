@@ -1,0 +1,37 @@
+import numpy as np
+from pkg_resources import EGG_DIST
+
+arr = np.random.randint(0, 10, size=(3, 4))
+print(arr)
+reshaped_arr = arr.reshape(4, 3).T
+print(reshaped_arr)
+filtered_arr = arr[arr > 5]
+print(filtered_arr)
+
+
+arr = np.array([[1, 2, 3, 4],
+                [5, 6, 7, 8],
+                [9, 10, 11, 12]])
+print(arr[1, 0:3])
+print(arr[:, 2])
+print(arr[::2, :])
+
+
+A = np.array([[1, 2, 3], [4, 5, 6]])
+B = np.array([[5, 6, 7], [8, 9, 10]])
+print(A * B)
+print(A @ B.T)
+arr = np.array([[1, 2], [3, 4]])
+print(np.sum(arr, axis=0))
+print(np.sum(arr, axis=1))
+arr = np.array([1.2, 3.5, 2.8])
+print(np.mean(arr))
+print(np.std(arr))
+print(np.round(arr))
+
+
+arr = np.random.rand(10)
+normalized = (arr - arr.min()) / (arr.max() - arr.min()) * 100
+print(normalized)
+print(np.cumsum(arr))
+print(np.maximum.accumulate(arr))
