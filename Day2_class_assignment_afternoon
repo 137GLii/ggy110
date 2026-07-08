@@ -1,0 +1,90 @@
+mport numpy as np
+from numba import njit
+from timeit import timeit as ti
+
+np.random.seed(42)
+a = np.random.rand(1000, 2000)
+B = np.random.rand(2000, 3000)
+def dot():
+    return np.dot(a, B)
+def at():
+    return a @ B
+def mt():
+    return np.matmul(a, B)
+n = 3
+td = ti(dot, number=n)
+print(td)
+ta = ti(at, number=n)
+print(ta)
+tm = ti(mt, number=n)
+print(tm)
+
+
+
+
+np.random.seed(42)
+ac = np.random.rand(1000, 1000)
+af = np.asfortranarray(ac)
+def sc():
+    return ac.sum(axis=1)
+def sf():
+    return af.sum(axis=1)
+def tc():
+    return ac.sum(axis=0)
+def tf():
+    return af.sum(axis=0)
+n = 100
+rc = ti(sc, number=n) / n
+rf = ti(sf, number=n) / n
+cc = ti(tc, number=n) / n
+cf = ti(tf, number=n) / n
+print(f"{rc * 1000:.3f} ms")
+print(f"{rf * 1000:.3f} ms")
+print(f"{cc * 1000:.3f} ms")
+print(f"{cf * 1000:.3f} ms")
+
+
+
+
+b = np.random.rand(1000, 1000)
+nv = b**2 + 2*b + 1
+re = np.empty_like(b)
+buf1 = np.empty_like(b)
+buf2 = np.empty_like(b)
+np.multiply(b, b, out=buf1)
+np.multiply(2, b, out=buf2)       
+np.add(buf1, buf2, out=buf1)      
+np.add(buf1, 1, out=buf1)
+
+
+
+
+
+# 2.1 对数收益率
+pr = np.array([100, 102, 105, 103, 107])
+rt = np.diff(np.log(pr))
+
+# 2.2 移动平均线
+np.random.seed(42)
+pr = 100 + np.cumsum(np.random.randn(100) * 2)
+ma5 = np.convolve(pr, np.ones(5)/5, mode='valid')
+ma20 = np.convolve(pr, np.ones(20)/20, mode='valid')
+cs = np.cumsum(np.insert(pr, 0, 0))
+mf = (cs[5:] - cs[:-5]) / 5
+# 2.3 风险分析
+np.random.seed(42)
+r = np.random.randn(1000, 252) * 0.01 + 0.0005
+vol = np.std(r, axis=1, ddof=1, keepdims=True) * np.sqrt(252)
+print(r.flags.owndata)
+corr = np.corrcoef(r)
+@njit
+def mb(arr, w):
+    n = len(arr)
+    out = np.empty(n - w + 1)
+    for i in range(n - w + 1):
+        s = 0.0
+        for j in range(w):
+            s += arr[i + j]
+        out[i] = s / w
+    return out
+mn = mb(pr, 5)
