@@ -1,32 +1,23 @@
 import numpy as np
 import matplotlib.pyplot as plt
-
-# ============================================================
 # 生成模拟股票价格数据（几何布朗运动）
-# ============================================================
 np.random.seed(42)
-
 days = 252
 n = days + 1
 tk = ['AAPL', 'MSFT', 'GOOGL']
 p0 = np.array([210.0, 500.0, 180.0])
 mu_d = np.array([0.0008, -0.0004, 0.0012])
 sig_d = np.array([0.015, 0.017, 0.019])
-
 eps = np.random.randn(days, 3)
 dr = mu_d + sig_d * eps
 c = np.zeros((n, 3))
 c[0] = p0
 for t in range(1, n):
     c[t] = c[t - 1] * np.exp(dr[t - 1])
-
 print(f"模拟数据: {days}个交易日, 3只股票")
 for i, t in enumerate(tk):
     print(f"  {t}: ${c[0, i]:.0f} -> ${c[-1, i]:.2f}")
-
-# ============================================================
 # 1. 收益率与波动率
-# ============================================================
 r = np.log(c[1:] / c[:-1])
 ann = 252
 mu = np.mean(r, axis=0) * ann
@@ -40,14 +31,10 @@ print("=" * 40)
 for i, t in enumerate(tk):
     print(f"{t}: 年化收益={mu[i] * 100:.2f}%, 波动={sig[i] * 100:.2f}%, 夏普={sr[i]:.3f}")
 print(f"累计收益率: AAPL={cum[-1, 0] * 100:.1f}%, MSFT={cum[-1, 1] * 100:.1f}%, GOOGL={cum[-1, 2] * 100:.1f}%")
-
-# ============================================================
 # 2. NumPy 移动平均线
-# ============================================================
 def ma(p, w):
     k = np.ones(w) / w
     return np.convolve(p, k, mode='valid')
-
 def ema(p, a):
     e = np.zeros_like(p)
     e[0] = p[0]
@@ -67,13 +54,9 @@ print("AAPL 移动平均线")
 print("=" * 40)
 print(f"MA5={s5[-1]:.2f}, MA20={s20[-1]:.2f}, MA60={s60[-1]:.2f}")
 print(f"EMA12={ea12[-1]:.2f}, EMA26={ea26[-1]:.2f}")
-
-# ============================================================
 # 3. 投资组合风险分析
-# ============================================================
 cov = np.cov(r.T, ddof=1) * ann
 corr = np.corrcoef(r.T)
-
 print("\n" + "=" * 40)
 print("投资组合风险分析")
 print("=" * 40)
@@ -81,13 +64,11 @@ print("年化协方差矩阵:")
 print(np.array2string(cov, precision=4))
 print("\n相关系数矩阵:")
 print(np.array2string(corr, precision=4))
-
 # 等权重组合
 w_eq = np.ones(3) / 3
 rp_eq = w_eq @ mu
 sigp_eq = np.sqrt(w_eq @ cov @ w_eq)
 print(f"\n等权重组合: 收益={rp_eq * 100:.2f}%, 波动={sigp_eq * 100:.2f}%")
-
 # 最小方差组合
 w_gmv = np.linalg.inv(cov) @ np.ones(3)
 w_gmv /= np.sum(w_gmv)
@@ -95,24 +76,18 @@ rp_gmv = w_gmv @ mu
 sigp_gmv = np.sqrt(w_gmv @ cov @ w_gmv)
 print(f"最小方差组合: 收益={rp_gmv * 100:.2f}%, 波动={sigp_gmv * 100:.2f}%")
 print(f"  权重: AAPL={w_gmv[0] * 100:.1f}%, MSFT={w_gmv[1] * 100:.1f}%, GOOGL={w_gmv[2] * 100:.1f}%")
-
 # 最大夏普组合
 w_msr = np.linalg.inv(cov) @ mu
 w_msr /= np.sum(w_msr)
 rp_msr = w_msr @ mu
 sigp_msr = np.sqrt(w_msr @ cov @ w_msr)
 print(f"最大夏普组合: 收益={rp_msr * 100:.2f}%, 波动={sigp_msr * 100:.2f}%, 夏普={rp_msr / sigp_msr:.3f}")
-
 # 蒙特卡洛模拟有效前沿
 w_r = np.random.dirichlet(np.ones(3), 5000)
 rp_r = w_r @ mu
 sigp_r = np.sqrt(np.sum(w_r @ cov * w_r, axis=1))
-
-# ============================================================
 # 4. 可视化
-# ============================================================
 fig, ax = plt.subplots(2, 3, figsize=(16, 9))
-
 # 股价走势
 ax[0, 0].plot(c[:, 0], label='AAPL', lw=1)
 ax[0, 0].plot(c[:, 1], label='MSFT', lw=1)
