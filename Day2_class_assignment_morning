@@ -35,3 +35,5 @@ normalized = (arr - arr.min()) / (arr.max() - arr.min()) * 100
 print(normalized)
 print(np.cumsum(arr))
 print(np.maximum.accumulate(arr))
+'''Python列表迭代时每一步都要经过解释器的类型检查与字节码执行，且仅存储对象指针、元素内存散落各处，CPU缓存命中率低；而NumPy的ndarray采用连续内存存储裸数据，可触发CPU缓存预加载，运算仅需下发一次指令、由C层批量跑完，执行效率远高于列表。
+NumPy中的reshape与resize操作存在明显区别：reshape不会改变原数组，会返回元素总数与原数组一致的新数组，通常是共享数据的视图；resize则会原地修改原数组，无返回值，支持增减元素，且会重新分配内存。'''
