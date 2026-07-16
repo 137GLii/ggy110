@@ -1,5 +1,4 @@
 import numpy as np
-
 def ip():
     """输入学生成绩数据"""
     global n, nm, sc
@@ -31,28 +30,21 @@ def st():
     mu = np.mean(sc)
     md = np.median(sc)
     sd = np.std(sc)
-    print("========== 成绩统计 ==========")
     print(f"总人数：{n}")
     print(f"最高分：{mx:.2f}")
     print(f"最低分：{mn:.2f}")
     print(f"平均分：{mu:.2f}")
     print(f"中位数：{md:.2f}")
     print(f"标准差：{sd:.2f}")
-    print("=" * 30 + "\n")
-
 def rk():
     """成绩排名"""
     if n == 0:
         print("请先输入成绩数据！\n")
         return
     idx = np.argsort(sc)[::-1]
-    print("========== 成绩排名 ==========")
     print(f"{'排名':<4} {'姓名':<10} {'成绩':<6}")
-    print("-" * 26)
     for i, ix in enumerate(idx, 1):
         print(f"{i:<4} {nm[ix]:<10} {sc[ix]:.2f}")
-    print("=" * 30 + "\n")
-
 def gr(v):
     """根据分数返回等级"""
     if v >= 90:
@@ -63,7 +55,6 @@ def gr(v):
         return 'C'
     else:
         return 'D'
-
 def ds():
     """成绩分布"""
     if n == 0:
@@ -72,14 +63,10 @@ def ds():
     g = np.array([gr(x) for x in sc])
     lbl = ['A(>=90)', 'B(80-89)', 'C(60-79)', 'D(<60)']
     cat = ['A', 'B', 'C', 'D']
-    print("========== 成绩分布 ==========")
     for i, lb in enumerate(lbl):
         c = np.sum(g == cat[i])
         p = c / n * 100
-        bar = "█" * int(p / 2)
         print(f"{lb:<10} {c:>3}人  {p:>6.2f}%  {bar}")
-    print("=" * 30 + "\n")
-
 def qr():
     """查询学生成绩"""
     if n == 0:
@@ -106,17 +93,14 @@ def mn():
     n = 0
     nm = []
     sc = np.array([])
-    while True:
-        print("=" * 28)
+    while True：
         print("     成绩分析系统")
-        print("=" * 28)
         print("1. 输入成绩数据")
         print("2. 查看成绩统计")
         print("3. 查看成绩排名")
         print("4. 查看成绩分布")
         print("5. 查询学生成绩")
         print("6. 退出系统")
-        print("-" * 28)
         c = input("请选择：")
         print()
         if c == '1':
