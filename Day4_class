@@ -1,12 +1,7 @@
 import numpy as np
 import pandas as pd
-
 pd.set_option('display.max_columns', None)
 pd.set_option('display.float_format', lambda x: f'{x:.2f}')
-
-# ============================================================
-# 数据准备
-# ============================================================
 orders = pd.DataFrame({
     'order_id': [f'O{number}' for number in range(1001, 1019)],
     'region': ['华东','华北','华南','华东','西南','华北','华南','华东','西南','华北','华东','华南','西南','华东','华北','华南','华东','西南'],
@@ -18,37 +13,19 @@ orders = pd.DataFrame({
     'coupon_rate': [0.05,0.00,0.08,0.10,0.05,0.00,0.12,0.05,0.00,0.08,0.10,0.05,0.00,0.12,0.05,0.08,0.00,0.10],
     'salesperson': ['小林','小周','小陈','小林','小赵','小周','小陈','小林','小赵','小周','小林','小陈','小赵','小林','小周','小陈','小林','小赵']
 })
-
-# ============================================================
-# 任务 1：快速理解数据
-# ============================================================
-print("=" * 60)
 print("任务 1：快速理解数据")
-print("=" * 60)
-
 print(f"\n1.1 数据形状: {orders.shape[0]} 行, {orders.shape[1]} 列")
 print(f"    列名: {list(orders.columns)}")
-
 region_col = orders['region']
 selected_cols = orders[['order_id', 'product', 'quantity']]
 print(f"\n1.2 orders['region'] 类型: {type(region_col).__name__}")
 print(f"    orders[['order_id','product','quantity']] 类型: {type(selected_cols).__name__}")
-
 print("\n1.3 iloc 取第4~8行、前4列:")
 print(orders.iloc[3:8, 0:4])
-
 print("\n1.4 loc 筛选华东订单:")
 print(orders.loc[orders['region'] == '华东', ['order_id', 'product', 'member_level']])
-
 print("\n1.5 loc 比 iloc 更适合长期维护，因为 loc 用列名访问语义清晰，列顺序变动不影响结果。")
-
-# ============================================================
-# 任务 2：构造订单结算指标
-# ============================================================
-print("\n" + "=" * 60)
 print("任务 2：构造订单结算指标")
-print("=" * 60)
-
 analysis = orders.copy()
 analysis['gross_amount'] = analysis['quantity'] * analysis['unit_price']
 analysis['member_discount'] = np.where(
@@ -60,41 +37,24 @@ analysis['payable_amount'] = (
 ).round(2)
 analysis['shipping_fee'] = np.where(analysis['payable_amount'] >= 1000, 0, 20)
 analysis['final_amount'] = (analysis['payable_amount'] + analysis['shipping_fee']).round(2)
-
 print("\n前8行结算指标:")
 print(analysis[[
     'order_id', 'region', 'product', 'quantity', 'unit_price',
     'member_level', 'coupon_rate', 'gross_amount', 'member_discount',
     'payable_amount', 'shipping_fee', 'final_amount'
 ]].head(8))
-
-# ============================================================
-# 任务 3：复杂条件筛选
-# ============================================================
-print("\n" + "=" * 60)
 print("任务 3：复杂条件筛选")
-print("=" * 60)
-
 cond_region = analysis['region'].isin(['华东', '华南'])
 cond_amount = analysis['final_amount'] >= 700
 cond_qty_or_gold = (analysis['quantity'] >= 2) | (analysis['member_level'] == '金卡')
 mask = cond_region & cond_amount & cond_qty_or_gold
-
 key_orders = analysis.loc[mask, [
     'order_id', 'region', 'product', 'quantity', 'member_level', 'final_amount'
 ]].sort_values('final_amount', ascending=False)
-
 print("\n重点跟进订单:")
 print(key_orders)
 print("\n解释: &、| 优先级高于比较运算符，不加括号会导致逻辑错误。")
-
-# ============================================================
-# 任务 4：封装可复用处理函数
-# ============================================================
-print("\n" + "=" * 60)
 print("任务 4：封装可复用处理函数")
-print("=" * 60)
-
 def add_order_level(df):
     df = df.copy()
     df['order_level'] = np.where(
@@ -102,18 +62,10 @@ def add_order_level(df):
         np.where(df['final_amount'] >= 1000, '重点订单', '普通订单')
     )
     return df
-
 leveled_orders = analysis.pipe(add_order_level)
 print("\n订单等级分布:")
 print(leveled_orders['order_level'].value_counts())
-
-# ============================================================
-# 任务 5：一条链完成经营汇总
-# ============================================================
-print("\n" + "=" * 60)
 print("任务 5：一条链完成经营汇总")
-print("=" * 60)
-
 region_report = (
     analysis
     .pipe(add_order_level)
@@ -128,26 +80,16 @@ region_report = (
     .round(2)
     .sort_values('revenue_sum', ascending=False)
 )
-
 print("\n地区经营汇总:")
 print(region_report)
-
-# ============================================================
-# 任务 6：经营诊断与表达
-# ============================================================
-print("\n" + "=" * 60)
 print("任务 6：经营诊断与表达")
-print("=" * 60)
-
 sp_revenue = leveled_orders.groupby('salesperson')['final_amount'].sum().round(2)
 top_salesperson = sp_revenue.idxmax()
 top_total = sp_revenue.max()
-
 sp_region = leveled_orders[leveled_orders['salesperson'] == top_salesperson].groupby('region')['final_amount'].sum().round(2)
 top_region = sp_region.idxmax()
 region_amount = sp_region.max()
 contribution_rate = (region_amount / top_total * 100).round(2)
-
 print(f"\n销售人员 : {top_salesperson}")
 print(f"核心地区 : {top_region}")
 print(f"总成交金额: {top_total:.2f} 元")
