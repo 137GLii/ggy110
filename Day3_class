@@ -1,6 +1,5 @@
 import numpy as np
 def ip():
-    """输入学生成绩数据"""
     global n, nm, sc
     n = int(input("请输入学生人数："))
     nm = []
@@ -19,9 +18,7 @@ def ip():
             except ValueError:
                 print("请输入有效的数字！")
     print(f"\n已成功录入{n}名学生成绩！\n")
-
 def st():
-    """成绩统计"""
     if n == 0:
         print("请先输入成绩数据！\n")
         return
@@ -37,7 +34,6 @@ def st():
     print(f"中位数：{md:.2f}")
     print(f"标准差：{sd:.2f}")
 def rk():
-    """成绩排名"""
     if n == 0:
         print("请先输入成绩数据！\n")
         return
@@ -46,7 +42,6 @@ def rk():
     for i, ix in enumerate(idx, 1):
         print(f"{i:<4} {nm[ix]:<10} {sc[ix]:.2f}")
 def gr(v):
-    """根据分数返回等级"""
     if v >= 90:
         return 'A'
     elif v >= 80:
@@ -56,7 +51,6 @@ def gr(v):
     else:
         return 'D'
 def ds():
-    """成绩分布"""
     if n == 0:
         print("请先输入成绩数据！\n")
         return
@@ -66,9 +60,9 @@ def ds():
     for i, lb in enumerate(lbl):
         c = np.sum(g == cat[i])
         p = c / n * 100
-        print(f"{lb:<10} {c:>3}人  {p:>6.2f}%  {bar}")
+        print(f"{lb:<10} {c:>3}人  {p:>6.2f}%  ")
+    print("=" * 30 + "\n")
 def qr():
-    """查询学生成绩"""
     if n == 0:
         print("请先输入成绩数据！\n")
         return
@@ -79,22 +73,18 @@ def qr():
             print(f"\n姓名：{nm[i]}")
             print(f"成绩：{sc[i]:.2f}")
             print(f"等级：{gr(sc[i])}")
-            # 计算排名
             r = int(np.sum(sc > sc[i]) + 1)
             print(f"排名：第{r}名\n")
             f = True
             break
     if not f:
         print(f"未找到学生：{q}\n")
-
 def mn():
-    """主菜单"""
     global n, nm, sc
     n = 0
     nm = []
     sc = np.array([])
-    while True：
-        print("     成绩分析系统")
+    while True:
         print("1. 输入成绩数据")
         print("2. 查看成绩统计")
         print("3. 查看成绩排名")
@@ -118,6 +108,4 @@ def mn():
             break
         else:
             print("无效选择，请重新输入！\n")
-
-# 程序入口
 mn()
